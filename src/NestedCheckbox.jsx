@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const data = [
+const initialData = [
   {
     id: 1,
     name: "Electronics",
@@ -26,18 +26,16 @@ const data = [
 ];
 
 const NestedCheckbox = () => {
+  const [data, setData] = useState(initialData);
   const [checkedItems, setCheckedItems] = useState({});
 
   const toggleCheckbox = (id, children = []) => {
     setCheckedItems((prev) => {
       const newCheckedState = { ...prev };
       const isChecked = !newCheckedState[id];
-
       newCheckedState[id] = isChecked;
-
-      // Recursively update children
+      
       children.forEach((child) => updateChildren(newCheckedState, child, isChecked));
-
       return newCheckedState;
     });
   };
@@ -62,11 +60,33 @@ const NestedCheckbox = () => {
             />
             {item.name}
           </label>
-
           {hasChildren && renderCheckboxes(item.children, level + 1)}
+          <button onClick={() => addCheckbox(item.id)}>Add Sub-Item</button>
         </div>
       );
     });
+  };
+
+  const addCheckbox = (parentId) => {
+    const newItem = {
+      id: Date.now(),
+      name: "New Item",
+      children: [],
+    };
+    
+    const updateTree = (items) => {
+      return items.map((item) => {
+        if (item.id === parentId) {
+          return { ...item, children: [...(item.children || []), newItem] };
+        }
+        if (item.children) {
+          return { ...item, children: updateTree(item.children) };
+        }
+        return item;
+      });
+    };
+
+    setData((prevData) => updateTree(prevData));
   };
 
   return <div>{renderCheckboxes(data)}</div>;
