@@ -47,7 +47,7 @@ const NestedCheckbox = () => {
     }
   };
 
-  const renderCheckboxes = (items, level = 0) => {
+  const renderCheckboxes = (items, level = 0, parent = null) => {
     return items.map((item) => {
       const hasChildren = item.children && item.children.length > 0;
       return (
@@ -60,8 +60,9 @@ const NestedCheckbox = () => {
             />
             {item.name}
           </label>
-          {hasChildren && renderCheckboxes(item.children, level + 1)}
           <button onClick={() => addCheckbox(item.id)}>Add Sub-Item</button>
+          <button onClick={() => removeCheckbox(item.id, parent)}>Remove</button>
+          {hasChildren && renderCheckboxes(item.children, level + 1, item)}
         </div>
       );
     });
@@ -87,6 +88,17 @@ const NestedCheckbox = () => {
     };
 
     setData((prevData) => updateTree(prevData));
+  };
+
+  const removeCheckbox = (id, parent) => {
+    const removeItem = (items) => items.filter((item) => item.id !== id);
+
+    if (parent) {
+      parent.children = removeItem(parent.children);
+      setData([...data]);
+    } else {
+      setData(removeItem(data));
+    }
   };
 
   return <div>{renderCheckboxes(data)}</div>;
